@@ -17,7 +17,7 @@
 10.	Submit URL repository and published website through dedicated Typeform submission that will be opened on Wednesday week 2 
 
 
-Mandatory pages (required) : 
+## Mandatory pages (required) : 
 1.	index.html 
 2.	style.css 
 3.	script.js
