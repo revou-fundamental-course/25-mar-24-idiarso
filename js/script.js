@@ -1,52 +1,125 @@
-document.getElementById('bmiForm').addEventListener('submit', function(e) {
-    e.preventDefault();
+// Variabel Bagian Kalkulator
+const kalkulator = document.querySelector(".kalkulator");
+const notice = document.querySelector(".notice");
+const pria = document.querySelector("#pria");
+const wanita = document.querySelector("#wanita");
+const berat = document.querySelector("#berat");
+const tinggi = document.querySelector("#tinggi");
+const hitung = document.querySelector("#hitung");
+const ulangi = document.querySelector("#ulangi");
+const theme = document.querySelector(":root");
 
-    // Ambil nilai tinggi dan berat badan
-    let height = parseFloat(document.getElementById('height').value);
-    let weight = parseFloat(document.getElementById('weight').value);
+// Variabel Bagian Hasil BMI
+const total = document.querySelector(".total");
+const kategori = document.querySelector(".kategori");
+const risiko = document.querySelector(".risiko");
+const listPenyakit = document.querySelector(".list-penyakit");
+const saran = document.querySelector(".saran");
 
-    // Validasi input
-    if (isNaN(height) || isNaN(weight) || height <= 0 || weight <= 0) {
-        alert('Masukkan nilai tinggi dan berat yang valid!');
-        return;
-    }
+// fungsi setelan default
+function defaultSet() {
+  pria.checked = true;
+}
+defaultSet();
 
-    // Hitung BMI
-    let bmi = weight / Math.pow(height / 100, 2);
-    let bmiCategory = '';
+// mengatur theme color sesuai gender user
+let gender = "";
+function cekGender() {
+  if (pria.checked == true) {
+    gender = "pria";
+    theme.style.setProperty("--primary", "royalblue");
+  } else if (wanita.checked == true) {
+    gender = "wanita";
+    theme.style.setProperty("--primary", "mediumvioletred");
+  }
+}
 
-    // Tentukan kategori BMI
-    if (bmi < 18.5) {
-        bmiCategory = 'Kurus';
-    } else if (bmi < 24.9) {
-        bmiCategory = 'Normal';
-    } else if (bmi < 29.9) {
-        bmiCategory = 'Gemuk';
-    } else {
-        bmiCategory = 'Obesitas';
-    }
+// handler ketika user klik button Hitung
+hitung.addEventListener("click", function (e) {
+  // untuk mencegah reload halaman / event bawaan
+  e.preventDefault();
 
-    // Tampilkan hasil BMI
-    document.getElementById('bmiResult').innerText = `BMI: ${bmi.toFixed(2)} (${bmiCategory})`;
+  // isi form dimasukan kedalam object agar mudah dalam pengambilan nilai
+  let hasil = {
+    berat: berat.value,
+    tinggi: tinggi.value,
+  };
 
-    // Tampilkan penjelasan
-    let explanation = '';
-    switch (bmiCategory) {
-        case 'Kurus':
-            explanation = 'Anda termasuk dalam kategori kurus. Anda mungkin perlu menambah berat badan.';
-            break;
-        case 'Normal':
-            explanation = 'Anda berada dalam kategori berat badan normal. Pertahankan!';
-            break;
-        case 'Gemuk':
-            explanation = 'Anda berada dalam kategori gemuk. Anda mungkin perlu menurunkan berat badan.';
-            break;
-        case 'Obesitas':
-            explanation = 'Anda berada dalam kategori obesitas. Konsultasikan dengan dokter untuk saran dan perawatan lebih lanjut.';
-            break
-        }
-        document.getElementById('bmiExplanation').innerText = explanation;
-    
-        // Tampilkan hasil
-        document.getElementById('resultContainer').style.display = 'block';
+  // validasi input
+  let inputKosong = hasil.berat == "" || hasil.tinggi == "";
+  let angkaPertama =
+    hasil.berat.charAt(0) == 0 ||
+    hasil.tinggi.charAt(0) == 0 ||
+    hasil.berat.includes("-") ||
+    hasil.tinggi.includes("-");
+  if (inputKosong) {
+    notice.textContent = "Berat dan Tinggi badan wajib diisi!";
+  } else if (angkaPertama) {
+    notice.textContent = "Angka pertama tidak boleh 0 atau -";
+  } else {
+    hitungBMI(hasil.berat, hasil.tinggi);
+    console.log(hasil);
+    kalkulator.classList.add("up");
+    notice.textContent = "";
+  }
+});
+
+// fungsi yang berisi proses perhitungan, pengkondisian dan manipulasi DOM
+function hitungBMI(berat, tinggi) {
+  let gejala = [];
+  // rumus BMI = berat / tinggi(diubah ke meter) ** 2
+  // membulatkan angka dibelakang desimal dengan tofixed(1)
+  // parseFloat untuk mengubah string menjadi number
+  let BMI = parseFloat((berat / (tinggi / 100) ** 2).toFixed(1));
+  console.log(BMI);
+  total.textContent = `${BMI}`;
+  let risikoPenyakit = (risiko.textContent =
+    "Dapat berisiko memicu penyakit :");
+  if (BMI < 18.5) {
+    kategori.textContent = "Kekurangan berat badan";
+    console.log("kurus");
+    risikoPenyakit;
+    gejala = ["Infertilitas", "Anemia", "Osteoporosis", "Sistem imun lemah"];
+    gejala.forEach((p) => {
+      listPenyakit.innerHTML += `<li>${p}</li>`;
     });
+    saran.textContent =
+      "Cara terbaik menaikan berat badan yaitu Menerapkan pola makan yang teratur dengan mengonsumsi makanan yang padat kalori dan nutrisi";
+  } else if (BMI >= 18.5 && BMI <= 24.9) {
+    kategori.textContent = "Berat badan ideal";
+    risiko.textContent = "Jaga terus gaya hidup sehatmu";
+    saran.textContent =
+      "Pastikan asupan kalori sesuai dengan kebutuhan kalori harian & konsumsi makanan sehat";
+    console.log("ideal");
+  } else if (BMI > 24.9 && BMI <= 29.9) {
+    kategori.textContent = "Kelebihan berat badan";
+    console.log("kelebihan berat badan");
+    risikoPenyakit;
+    gejala = ["Diabetes", "Hipertensi", "Sakit Jantung", "Osteoarthritis"];
+    gejala.forEach((p) => {
+      listPenyakit.innerHTML += `<li>${p}</li>`;
+    });
+    saran.textContent =
+      "Utamakan gaya hidup sehat seperti berolahraga dan memperhatikan kadar konsumsi kalor harian untuk mengurangi berat badan berlebih";
+  } else if (BMI > 29.9) {
+    kategori.textContent = "Obesitas";
+    console.log("obesitas");
+    risikoPenyakit;
+    gejala = ["Diabetes", "Hipertensi", "Sakit Jantung", "Osteoarthritis"];
+    gejala.forEach((p) => {
+      listPenyakit.innerHTML += `<li>${p}</li>`;
+    });
+    saran.textContent =
+      "Cara terbaik untuk menurunkan berat badan adalah dengan mengatur jumlah kalor pada makanan yang dikonsumsi dan berolahraga";
+  } else {
+    total.textContent = "angka tidak valid";
+    risiko.textContent = "";
+  }
+}
+
+// handler ketika user klik button Hitung Ulang
+ulangi.addEventListener("click", function (e) {
+  e.preventDefault();
+  kalkulator.classList.remove("up");
+  listPenyakit.innerHTML = "";
+});
